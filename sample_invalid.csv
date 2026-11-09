@@ -1,0 +1,7 @@
+product_code,product_name,category,price,stock_quantity,status
+PRD-001,Duplicate Keyboard,Accessories,1500.00,20,Active
+PRD-090,Faulty Price Item,Accessories,-350.00,10,Active
+PRD-091,Negative Stock Item,Hardware,900.00,-15,Active
+PRD-092,Invalid Status Item,Audio,1200.00,5,Pending
+PRD-093,First Item In File,Cables,300.00,10,Active
+PRD-093,Duplicate Item In File,Cables,350.00,12,Active

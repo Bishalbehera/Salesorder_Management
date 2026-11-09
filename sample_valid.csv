@@ -1,0 +1,6 @@
+product_code,product_name,category,price,stock_quantity,status
+PRD-010,4K Ultra HD Web Camera,Electronics,4500.00,15,Active
+PRD-011,Heavy Duty Dual Monitor Stand,Office Furniture,2800.00,20,Active
+PRD-012,Braided HDMI 2.1 Cable,Cables,450.00,100,Active
+PRD-013,Surge Protector 6-Socket,Electrical,1100.00,35,Active
+PRD-014,Noise Dampening Desk Pad,Accessories,750.00,40,Inactive

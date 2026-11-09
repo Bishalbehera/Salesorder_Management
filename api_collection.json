@@ -1,0 +1,187 @@
+{
+  "info": {
+    "name": "Savyant Systems - Sales Order & Inventory Management API",
+    "description": "Authenticated REST API endpoints for products and sales orders conforming to Part 8.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "List Active Products (Search & Pagination)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/products/?search=keyboard&page=1&page_size=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "products", ""],
+              "query": [
+                { "key": "search", "value": "keyboard", "description": "Optional search term across product_code, name, and category" },
+                { "key": "page", "value": "1" },
+                { "key": "page_size", "value": "10" }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"count\": 1,\n  \"next\": null,\n  \"previous\": null,\n  \"results\": [\n    {\n      \"id\": 1,\n      \"product_code\": \"PRD-001\",\n      \"name\": \"Mechanical Keyboard\",\n      \"category\": \"Accessories\",\n      \"price\": \"1500.00\",\n      \"stock_quantity\": 33,\n      \"is_active\": true,\n      \"created_at\": \"2026-11-09T17:29:00Z\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Product Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/products/1/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "products", "1", ""]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"id\": 1,\n  \"product_code\": \"PRD-001\",\n  \"name\": \"Mechanical Keyboard\",\n  \"category\": \"Accessories\",\n  \"price\": \"1500.00\",\n  \"stock_quantity\": 33,\n  \"is_active\": true,\n  \"created_at\": \"2026-11-09T17:29:00Z\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Sales Orders",
+      "item": [
+        {
+          "name": "Create Draft Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customer_id\": 1,\n  \"discount_percentage\": \"10.00\",\n  \"items\": [\n    {\n      \"product_id\": 1,\n      \"quantity\": 2\n    },\n    {\n      \"product_id\": 2,\n      \"quantity\": 3\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/orders/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "orders", ""]
+            }
+          },
+          "response": [
+            {
+              "name": "Created Draft Order",
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"id\": 5,\n  \"order_number\": \"SO-20261109-0005\",\n  \"customer\": {\n    \"id\": 1,\n    \"name\": \"Apex Enterprises\",\n    \"email\": \"contact@apex.com\",\n    \"mobile\": \"+91-9876543210\",\n    \"city\": \"Mumbai\",\n    \"is_active\": true\n  },\n  \"order_date\": \"2026-11-09\",\n  \"status\": \"draft\",\n  \"discount_percentage\": \"10.00\",\n  \"subtotal\": \"4500.00\",\n  \"discount_amount\": \"450.00\",\n  \"grand_total\": \"4050.00\",\n  \"created_by\": {\n    \"id\": 2,\n    \"name\": \"Rahul Sharma (Sales)\",\n    \"email\": \"sales1@savyant.com\",\n    \"role\": \"sales\"\n  },\n  \"items\": [\n    {\n      \"id\": 7,\n      \"product\": 1,\n      \"product_code\": \"PRD-001\",\n      \"product_name\": \"Mechanical Keyboard\",\n      \"quantity\": 2,\n      \"rate\": \"1500.00\",\n      \"amount\": \"3000.00\"\n    },\n    {\n      \"id\": 8,\n      \"product\": 2,\n      \"product_code\": \"PRD-002\",\n      \"product_name\": \"Optical Mouse\",\n      \"quantity\": 3,\n      \"rate\": \"500.00\",\n      \"amount\": \"1500.00\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Order By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/orders/1/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "orders", "1", ""]
+            }
+          },
+          "response": [
+            {
+              "name": "Order Details",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"id\": 1,\n  \"order_number\": \"SO-20261109-0001\",\n  \"customer\": {\n    \"id\": 1,\n    \"name\": \"Apex Enterprises\",\n    \"email\": \"contact@apex.com\",\n    \"mobile\": \"+91-9876543210\",\n    \"city\": \"Mumbai\",\n    \"is_active\": true\n  },\n  \"order_date\": \"2026-11-09\",\n  \"status\": \"confirmed\",\n  \"discount_percentage\": \"10.00\",\n  \"subtotal\": \"4500.00\",\n  \"discount_amount\": \"450.00\",\n  \"grand_total\": \"4050.00\",\n  \"created_by\": {\n    \"id\": 2,\n    \"name\": \"Rahul Sharma (Sales)\",\n    \"email\": \"sales1@savyant.com\",\n    \"role\": \"sales\"\n  },\n  \"items\": [\n    {\n      \"id\": 1,\n      \"product\": 1,\n      \"product_code\": \"PRD-001\",\n      \"product_name\": \"Mechanical Keyboard\",\n      \"quantity\": 2,\n      \"rate\": \"1500.00\",\n      \"amount\": \"3000.00\"\n    },\n    {\n      \"id\": 2,\n      \"product\": 2,\n      \"product_code\": \"PRD-002\",\n      \"product_name\": \"Optical Mouse\",\n      \"quantity\": 3,\n      \"rate\": \"500.00\",\n      \"amount\": \"1500.00\"\n    }\n  ]\n}"
+            },
+            {
+              "name": "Forbidden (Sales user accessing another user's order)",
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"Access denied. You do not have permission to view another user's order.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Confirm Order (Deduct Stock)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/orders/3/confirm/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "orders", "3", "confirm", ""]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Confirmation",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Order successfully confirmed and stock deducted.\",\n  \"order\": {\n    \"id\": 3,\n    \"order_number\": \"SO-20261109-0003\",\n    \"status\": \"confirmed\"\n  }\n}"
+            },
+            {
+              "name": "Insufficient Stock Error",
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"Insufficient stock for: PRD-005 (Wireless Noise-Canceling Headset): available 2, required 5. Entire confirmation rejected.\",\n  \"insufficient_items\": [\n    {\n      \"product_code\": \"PRD-005\",\n      \"product_name\": \"Wireless Noise-Canceling Headset\",\n      \"available\": 2,\n      \"required\": 5\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cancel Order (Restore Stock)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/orders/1/cancel/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "orders", "1", "cancel", ""]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Cancellation",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Order successfully cancelled.\",\n  \"order\": {\n    \"id\": 1,\n    \"order_number\": \"SO-20261109-0001\",\n    \"status\": \"cancelled\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000"
+    }
+  ]
+}
