@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Confirm Delete - {{ product.name }}{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 500px; margin: 2rem auto;">
+    <div class="card-header">
+        <h1 class="card-title" style="color: var(--danger);">Confirm Product Deletion</h1>
+    </div>
+
+    <p style="margin-bottom: 1rem; color: #475569;">
+        Are you sure you want to permanently delete product <strong>"{{ product.product_code }} - {{ product.name }}"</strong>?
+    </p>
+
+    <div class="alert alert-warning" style="font-size: 0.85rem;">
+        Note: You can only delete products that have never been referenced in any sales orders or stock movements.
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
+            <button type="submit" class="btn btn-danger">Confirm Delete</button>
+            <a href="{% url 'product_list' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Customer Sales Summary - Savyant Systems{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div>
+            <h1 class="card-title">Customer Sales Summary</h1>
+            <p style="color: var(--text-muted); font-size: 0.875rem;">
+                Confirmed order counts and revenue totals per customer.
+            </p>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+            <a href="{% url 'report_product_sales' %}" class="btn btn-secondary btn-sm">Product Sales</a>
+            <a href="{% url 'report_low_stock' %}" class="btn btn-secondary btn-sm">Low Stock</a>
+            <a href="{% url 'report_stock_movements' %}" class="btn btn-secondary btn-sm">Stock Movements</a>
+        </div>
+    </div>
+
+    <!-- Date Range Filter -->
+    <form method="GET" class="form-inline-filter" style="margin-bottom: 1.5rem;">
+        <div>
+            <label class="form-label" for="start_date">From Order Date</label>
+            <input type="date" id="start_date" name="start_date" value="{{ start_date }}" class="form-control">
+        </div>
+
+        <div>
+            <label class="form-label" for="end_date">To Order Date</label>
+            <input type="date" id="end_date" name="end_date" value="{{ end_date }}" class="form-control">
+        </div>
+
+        <div>
+            <button type="submit" class="btn btn-secondary">Filter Range</button>
+            {% if start_date or end_date %}
+            <a href="{% url 'report_customer_sales' %}" class="btn btn-sm btn-secondary" style="margin-left: 0.25rem;">Reset</a>
+            {% endif %}
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Customer Name</th>
+                    <th>Email</th>
+                    <th>City</th>
+                    <th>Status</th>
+                    <th style="text-align: right;">Confirmed Orders Count</th>
+                    <th style="text-align: right;">Total Sales After Discount (₹)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for summary in customers_summary %}
+                <tr>
+                    <td><strong>{{ summary.name }}</strong></td>
+                    <td>{{ summary.email }}</td>
+                    <td>{{ summary.city }}</td>
+                    <td>
+                        <span class="badge {% if summary.is_active %}badge-active{% else %}badge-inactive{% endif %}">
+                            {% if summary.is_active %}Active{% else %}Inactive{% endif %}
+                        </span>
+                    </td>
+                    <td style="text-align: right;">
+                        <strong>{{ summary.confirmed_order_count }}</strong>
+                    </td>
+                    <td style="text-align: right; font-weight: 700; color: {% if summary.total_sales > 0 %}var(--success){% else %}var(--text-muted){% endif %};">
+                        ₹{{ summary.total_sales|floatformat:2 }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                        No customer data found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

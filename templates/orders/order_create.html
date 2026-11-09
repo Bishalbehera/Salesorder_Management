@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create Sales Order - Savyant Systems{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div>
+            <h1 class="card-title">Create Sales Order</h1>
+            <p style="color: var(--text-muted); font-size: 0.875rem;">Create a multi-item order in Draft state</p>
+        </div>
+        <a href="{% url 'order_list' %}" class="btn btn-secondary btn-sm">&larr; Back to Orders</a>
+    </div>
+
+    <!-- Client-side Validation Notification Banner -->
+    <div id="validationAlert" class="alert alert-error" style="display: none;"></div>
+
+    <form method="POST" id="orderForm">
+        {% csrf_token %}
+
+        <!-- Customer & Order Level Config -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label" for="customerSelect">Select Customer *</label>
+                <select name="customer_id" id="customerSelect" class="form-select" required>
+                    <option value="">-- Choose an Active Customer --</option>
+                    {% for customer in customers %}
+                    <option value="{{ customer.id }}">{{ customer.name }} ({{ customer.city }})</option>
+                    {% endfor %}
+                </select>
+                <small style="color: var(--text-muted);">Only active customers can place orders.</small>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label" for="discountInput">Order Discount Percentage (0% - 20%)</label>
+                <input type="number" step="0.01" min="0" max="20" name="discount_percentage" id="discountInput" class="form-control" value="0.00">
+                <small style="color: var(--text-muted);">Maximum allowable discount is 20.00%.</small>
+            </div>
+        </div>
+
+        <!-- Dynamic Items Section -->
+        <div style="margin-bottom: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                <h2 style="font-size: 1.15rem; font-weight: 600; color: var(--primary);">Order Items</h2>
+                <button type="button" id="addRowBtn" class="btn btn-secondary btn-sm">+ Add Product Row</button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table" id="orderItemsTable">
+                    <thead>
+                        <tr>
+                            <th style="min-width: 280px;">Product Item *</th>
+                            <th style="width: 140px;">Availability</th>
+                            <th style="width: 130px;">Quantity *</th>
+                            <th style="width: 140px;">Current Rate (₹)</th>
+                            <th style="width: 140px;">Item Amount (₹)</th>
+                            <th style="width: 60px; text-align: center;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="orderItemsTableBody">
+                        <!-- Dynamic Rows Injected by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Live Totals Summary Box -->
+        <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+            <div class="order-summary-box">
+                <div class="summary-row">
+                    <span style="color: var(--text-muted);">Subtotal:</span>
+                    <span>₹<span id="subtotalDisplay">0.00</span></span>
+                </div>
+                <div class="summary-row">
+                    <span style="color: var(--text-muted);">Discount Amount:</span>
+                    <span style="color: var(--danger);">- ₹<span id="discountAmountDisplay">0.00</span></span>
+                </div>
+                <div class="summary-row grand-total">
+                    <span>Grand Total:</span>
+                    <span>₹<span id="grandTotalDisplay">0.00</span></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit & Actions -->
+        <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 1.25rem;">
+            <a href="{% url 'order_list' %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" id="submitOrderBtn" class="btn btn-primary" style="padding: 0.65rem 1.5rem;">
+                Create Draft Order
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Expose active products list to JavaScript for dynamic row creation
+    window.AVAILABLE_PRODUCTS = [
+        {% for product in products %}
+        {
+            id: {{ product.id }},
+            code: "{{ product.product_code|escapejs }}",
+            name: "{{ product.name|escapejs }}",
+            price: {{ product.price }},
+            stock: {{ product.stock_quantity }}
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+</script>
+<script src="{% static 'js/order_form.js' %}"></script>
+{% endblock %}

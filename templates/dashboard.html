@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Savyant Systems{% endblock %}
+
+{% block content %}
+<div class="card-header" style="border: none; padding-bottom: 0;">
+    <div>
+        <h1 style="font-size: 1.75rem; color: var(--primary);">Dashboard Overview</h1>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">
+            Real-time status of orders, inventory stock, and operations.
+        </p>
+    </div>
+    <div>
+        <a href="{% url 'order_create' %}" class="btn btn-accent">+ New Sales Order</a>
+    </div>
+</div>
+
+<!-- Key Performance Stats -->
+<div class="stats-grid" style="margin-top: 1.5rem;">
+    <div class="stat-card">
+        <span class="stat-label">Total Orders</span>
+        <span class="stat-value">{{ total_orders }}</span>
+    </div>
+
+    <div class="stat-card">
+        <span class="stat-label">Draft Orders</span>
+        <span class="stat-value" style="color: var(--warning);">{{ draft_orders }}</span>
+    </div>
+
+    <div class="stat-card">
+        <span class="stat-label">Confirmed Orders</span>
+        <span class="stat-value" style="color: var(--success);">{{ confirmed_orders }}</span>
+    </div>
+
+    <div class="stat-card">
+        <span class="stat-label">Total Confirmed Sales</span>
+        <span class="stat-value" style="color: var(--primary);">₹{{ total_sales|floatformat:2 }}</span>
+    </div>
+
+    {% if user.is_admin_user %}
+    <div class="stat-card">
+        <span class="stat-label">Low Stock Alerts</span>
+        <span class="stat-value" style="color: {% if low_stock_count > 0 %}var(--danger){% else %}var(--success){% endif %};">
+            {{ low_stock_count }}
+        </span>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Recent Orders Table -->
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Recent Orders</h2>
+        <a href="{% url 'order_list' %}" class="btn btn-secondary btn-sm">View All Orders &rarr;</a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Order #</th>
+                    <th>Customer</th>
+                    <th>Date</th>
+                    <th>Grand Total</th>
+                    <th>Status</th>
+                    <th>Created By</th>
+                    <th style="text-align: right;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in recent_orders %}
+                <tr>
+                    <td><strong>{{ order.order_number }}</strong></td>
+                    <td>{{ order.customer.name }}</td>
+                    <td>{{ order.order_date }}</td>
+                    <td>₹{{ order.grand_total|floatformat:2 }}</td>
+                    <td>
+                        <span class="badge badge-{{ order.status }}">
+                            {{ order.get_status_display }}
+                        </span>
+                    </td>
+                    <td>{{ order.created_by.name }}</td>
+                    <td style="text-align: right;">
+                        <a href="{% url 'order_detail' order.id %}" class="btn btn-secondary btn-sm">View Details</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                        No orders recorded yet. Click <strong>+ New Sales Order</strong> to create one.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

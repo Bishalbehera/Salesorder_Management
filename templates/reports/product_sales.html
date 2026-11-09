@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Product Sales Summary - Savyant Systems{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div>
+            <h1 class="card-title">Product Sales Summary</h1>
+            <p style="color: var(--text-muted); font-size: 0.875rem;">
+                Total quantity sold and gross value (before order-level discount) for confirmed orders.
+            </p>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+            <a href="{% url 'report_customer_sales' %}" class="btn btn-secondary btn-sm">Customer Sales</a>
+            <a href="{% url 'report_low_stock' %}" class="btn btn-secondary btn-sm">Low Stock</a>
+            <a href="{% url 'report_stock_movements' %}" class="btn btn-secondary btn-sm">Stock Movements</a>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Product Code</th>
+                    <th>Product Name</th>
+                    <th>Category</th>
+                    <th>Current Price</th>
+                    <th style="text-align: right;">Quantity Sold (Confirmed)</th>
+                    <th style="text-align: right;">Gross Value Sold (₹)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in product_summary %}
+                <tr>
+                    <td><code>{{ p.product_code }}</code></td>
+                    <td><strong>{{ p.name }}</strong></td>
+                    <td><span class="badge badge-secondary" style="background: #e2e8f0; color: #334155;">{{ p.category }}</span></td>
+                    <td>₹{{ p.price|floatformat:2 }}</td>
+                    <td style="text-align: right;">
+                        <strong style="color: {% if p.quantity_sold > 0 %}var(--primary){% else %}var(--text-muted){% endif %};">
+                            {{ p.quantity_sold }}
+                        </strong>
+                    </td>
+                    <td style="text-align: right; font-weight: 700; color: {% if p.gross_value > 0 %}var(--success){% else %}var(--text-muted){% endif %};">
+                        ₹{{ p.gross_value|floatformat:2 }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                        No product sales records available.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Import Products via CSV - Savyant Systems{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 800px; margin: 0 auto;">
+    <div class="card-header">
+        <div>
+            <h1 class="card-title">Bulk Product CSV Import</h1>
+            <p style="color: var(--text-muted); font-size: 0.875rem;">
+                Admin-only atomic all-or-nothing product data import
+            </p>
+        </div>
+        <a href="{% url 'product_list' %}" class="btn btn-secondary btn-sm">&larr; Back to Products</a>
+    </div>
+
+    <!-- Error Reporting Table if validation failed -->
+    {% if results and results.errors %}
+    <div class="alert alert-error" style="margin-bottom: 1.5rem;">
+        <h3 style="font-size: 1rem; margin-bottom: 0.5rem; font-weight: 700;">
+            Import Failed: All-or-Nothing Rule Enforced
+        </h3>
+        <p style="margin-bottom: 0.75rem;">
+            Found {{ results.errors|length }} error(s) in your CSV file. As required, <strong>0 products were imported</strong> to prevent partial corruption. Please fix the errors below and try again.
+        </p>
+
+        <div class="table-responsive" style="background: #fff; border-radius: var(--radius); border: 1px solid #fca5a5;">
+            <table class="table" style="font-size: 0.85rem;">
+                <thead style="background: #fee2e2;">
+                    <tr>
+                        <th style="width: 100px; color: #991b1b;">CSV Row #</th>
+                        <th style="color: #991b1b;">Exact Failure Reason</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for err in results.errors %}
+                    <tr>
+                        <td><strong>Row {{ err.row }}</strong></td>
+                        <td style="color: #991b1b;">{{ err.error }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Instructions & Format -->
+    <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1.75rem;">
+        <h3 style="font-size: 0.95rem; color: var(--primary); margin-bottom: 0.5rem;">Required CSV Specification</h3>
+        <p style="font-size: 0.85rem; color: #475569; margin-bottom: 0.75rem;">
+            The file must contain the following comma-separated header with exact column names:
+        </p>
+        <pre style="background: #0f172a; color: #f8fafc; padding: 0.75rem; border-radius: 6px; font-size: 0.825rem; overflow-x: auto;">product_code,product_name,category,price,stock_quantity,status
+PRD-101,Mechanical Keyboard Pro,Accessories,2500.00,30,Active
+PRD-102,Laser Gaming Mouse,Accessories,950.00,50,Active</pre>
+        <ul style="font-size: 0.825rem; color: #475569; margin-top: 0.75rem; padding-left: 1.25rem;">
+            <li>Status must be either <code>Active</code> or <code>Inactive</code>.</li>
+            <li>Prices and Stock Quantities must be non-negative numeric values.</li>
+            <li>Product codes must be unique in the file and not already exist in the database.</li>
+            <li>Opening stock (> 0) will automatically be logged as <code>OPENING_STOCK</code> in movement history.</li>
+        </ul>
+    </div>
+
+    <!-- Upload Form -->
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+            <label class="form-label" for="csv_file">Select CSV File (.csv) *</label>
+            <input type="file" id="csv_file" name="csv_file" accept=".csv" class="form-control" required style="padding: 0.75rem;">
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem; border-top: 1px solid var(--border); padding-top: 1rem;">
+            <button type="submit" class="btn btn-primary" style="padding: 0.65rem 1.5rem;">
+                Upload &amp; Validate CSV
+            </button>
+            <a href="{% url 'product_list' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

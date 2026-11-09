@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}Products - Savyant Systems{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div>
+            <h1 class="card-title">Product & Stock Master</h1>
+            <p style="color: var(--text-muted); font-size: 0.875rem;">Manage products, prices and stock inventory</p>
+        </div>
+        {% if user.is_admin_user %}
+        <div style="display: flex; gap: 0.5rem;">
+            <a href="{% url 'csv_import' %}" class="btn btn-secondary">Import CSV</a>
+            <a href="{% url 'product_create' %}" class="btn btn-primary">+ Add New Product</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Search & Filters -->
+    <form method="GET" class="form-inline-filter">
+        <div style="flex: 1; min-width: 250px;">
+            <label class="form-label">Search</label>
+            <input type="text" name="q" value="{{ search_query }}" placeholder="Search by product code or name..." class="form-control">
+        </div>
+
+        <div style="min-width: 170px;">
+            <label class="form-label">Category</label>
+            <select name="category" class="form-select">
+                <option value="">All Categories</option>
+                {% for cat in categories %}
+                <option value="{{ cat }}" {% if category_filter == cat %}selected{% endif %}>{{ cat }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        {% if user.is_admin_user %}
+        <div style="min-width: 140px;">
+            <label class="form-label">Status</label>
+            <select name="status" class="form-select">
+                <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All</option>
+                <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+                <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+            </select>
+        </div>
+        {% endif %}
+
+        <div>
+            <button type="submit" class="btn btn-secondary">Filter</button>
+            {% if search_query or category_filter or status_filter != 'all' %}
+            <a href="{% url 'product_list' %}" class="btn btn-sm btn-secondary" style="margin-left: 0.25rem;">Reset</a>
+            {% endif %}
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Product Name</th>
+                    <th>Category</th>
+                    <th>Rate / Price</th>
+                    <th>Stock Qty</th>
+                    <th>Status</th>
+                    {% if user.is_admin_user %}
+                    <th style="text-align: right;">Actions</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <td><code>{{ product.product_code }}</code></td>
+                    <td><strong>{{ product.name }}</strong></td>
+                    <td><span class="badge badge-secondary" style="background: #e2e8f0; color: #334155;">{{ product.category }}</span></td>
+                    <td>₹{{ product.price|floatformat:2 }}</td>
+                    <td>
+                        <strong style="color: {% if product.stock_quantity < 5 %}var(--danger){% elif product.stock_quantity < 15 %}var(--warning){% else %}var(--success){% endif %};">
+                            {{ product.stock_quantity }}
+                        </strong>
+                    </td>
+                    <td>
+                        <span class="badge {% if product.is_active %}badge-active{% else %}badge-inactive{% endif %}">
+                            {% if product.is_active %}Active{% else %}Inactive{% endif %}
+                        </span>
+                    </td>
+                    {% if user.is_admin_user %}
+                    <td style="text-align: right;">
+                        <a href="{% url 'stock_adjust' product.id %}" class="btn btn-sm btn-accent" title="Manual Stock Adjustment">
+                            Adjust Stock
+                        </a>
+                        <a href="{% url 'product_edit' product.id %}" class="btn btn-secondary btn-sm">Edit</a>
+                        
+                        <form method="POST" action="{% url 'product_toggle_status' product.id %}" style="display: inline-block;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-secondary btn-sm" title="Toggle active status">
+                                {% if product.is_active %}Deactivate{% else %}Activate{% endif %}
+                            </button>
+                        </form>
+
+                        {% if product.can_delete %}
+                        <a href="{% url 'product_delete' product.id %}" class="btn btn-danger btn-sm">Delete</a>
+                        {% else %}
+                        <button type="button" class="btn btn-secondary btn-sm" disabled title="Referenced in orders or stock history. Deactivate instead of deleting.">
+                            Referenced
+                        </button>
+                        {% endif %}
+                    </td>
+                    {% endif %}
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                        No products found matching your search.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

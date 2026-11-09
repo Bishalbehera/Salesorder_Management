@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}Order {{ order.order_number }} - Savyant Systems{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div>
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.25rem;">
+                <h1 class="card-title" style="margin-bottom: 0;">Order {{ order.order_number }}</h1>
+                <span class="badge badge-{{ order.status }}" style="font-size: 0.85rem; padding: 0.35rem 0.75rem;">
+                    {{ order.get_status_display }}
+                </span>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.875rem;">
+                Placed on {{ order.order_date }} by <strong>{{ order.created_by.name }}</strong>
+            </p>
+        </div>
+
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <a href="{% url 'order_list' %}" class="btn btn-secondary btn-sm">&larr; Back to Orders</a>
+
+            {% if order.status == 'draft' %}
+                <!-- Confirm Button -->
+                <form method="POST" action="{% url 'order_confirm' order.id %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success btn-sm" data-confirm="Are you sure you want to confirm this order? Stock will be immediately deducted for all items.">
+                        Confirm Order &amp; Deduct Stock
+                    </button>
+                </form>
+
+                <!-- Cancel Button -->
+                <form method="POST" action="{% url 'order_cancel' order.id %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm" data-confirm="Are you sure you want to cancel this draft order?">
+                        Cancel Order
+                    </button>
+                </form>
+
+            {% elif order.status == 'confirmed' %}
+                <!-- Cancel Confirmed Order -->
+                <form method="POST" action="{% url 'order_cancel' order.id %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm" data-confirm="Are you sure you want to cancel this Confirmed order? Deducted inventory quantities will be restored back to stock.">
+                        Cancel Order &amp; Restore Stock
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Customer Details Card -->
+    <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1.75rem;">
+        <h3 style="font-size: 1rem; color: var(--primary); margin-bottom: 0.5rem;">Customer Information</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; font-size: 0.9rem;">
+            <div><strong>Name:</strong> {{ order.customer.name }}</div>
+            <div><strong>Email:</strong> {{ order.customer.email }}</div>
+            <div><strong>Mobile:</strong> {{ order.customer.mobile }}</div>
+            <div><strong>City:</strong> {{ order.customer.city }}</div>
+        </div>
+    </div>
+
+    <!-- Order Items Table -->
+    <h3 style="font-size: 1.1rem; color: var(--primary); margin-bottom: 0.75rem;">Order Line Items</h3>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Product Code</th>
+                    <th>Product Name</th>
+                    <th>Category</th>
+                    <th style="text-align: right;">Quantity</th>
+                    <th style="text-align: right;">Unit Rate (₹)</th>
+                    <th style="text-align: right;">Amount (₹)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td><code>{{ item.product.product_code }}</code></td>
+                    <td><strong>{{ item.product.name }}</strong></td>
+                    <td><span class="badge badge-secondary" style="background: #e2e8f0; color: #334155;">{{ item.product.category }}</span></td>
+                    <td style="text-align: right;">{{ item.quantity }}</td>
+                    <td style="text-align: right;">₹{{ item.rate|floatformat:2 }}</td>
+                    <td style="text-align: right; font-weight: 600;">₹{{ item.amount|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Financial Calculation Summary Box -->
+    <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+        <div class="order-summary-box">
+            <div class="summary-row">
+                <span style="color: var(--text-muted);">Subtotal:</span>
+                <span>₹{{ order.subtotal|floatformat:2 }}</span>
+            </div>
+            <div class="summary-row">
+                <span style="color: var(--text-muted);">Discount ({{ order.discount_percentage }}%):</span>
+                <span style="color: var(--danger);">- ₹{{ order.discount_amount|floatformat:2 }}</span>
+            </div>
+            <div class="summary-row grand-total">
+                <span>Grand Total:</span>
+                <span>₹{{ order.grand_total|floatformat:2 }}</span>
+            </div>
+        </div>
+    </div>
+
+    {% if order.status == 'confirmed' or order.status == 'cancelled' %}
+    <div class="alert alert-info" style="margin-top: 2rem;">
+        <strong>Notice:</strong> This order is in <strong>{{ order.get_status_display }}</strong> status and is read-only. Order lines and financial totals cannot be modified.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

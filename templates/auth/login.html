@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - Savyant Systems{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-header">
+        <h1>Welcome Back</h1>
+        <p>Sign in to access Sales & Inventory Management</p>
+    </div>
+
+    <form method="POST" action="{% url 'login' %}">
+        {% csrf_token %}
+        <div class="form-group">
+            <label class="form-label" for="email">Email Address</label>
+            <input type="email" id="email" name="email" class="form-control" placeholder="user@savyant.com" required autofocus>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="password">Password</label>
+            <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem; font-size: 1rem; margin-top: 0.5rem;">
+            Sign In
+        </button>
+    </form>
+
+    <div style="margin-top: 1.75rem; padding-top: 1.25rem; border-top: 1px dashed var(--border); font-size: 0.85rem; color: var(--text-muted);">
+        <strong style="color: var(--primary);">Sample Demonstration Accounts:</strong>
+        <div style="margin-top: 0.5rem;">
+            <p><strong>Admin:</strong> <code>admin@savyant.com</code> / <code>Admin@123</code></p>
+            <p><strong>Sales User 1:</strong> <code>sales1@savyant.com</code> / <code>Sales@123</code></p>
+            <p><strong>Sales User 2:</strong> <code>sales2@savyant.com</code> / <code>Sales@123</code></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

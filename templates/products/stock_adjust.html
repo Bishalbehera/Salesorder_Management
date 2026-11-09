@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Adjust Stock - {{ product.name }}{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 650px; margin: 0 auto 2rem auto;">
+    <div class="card-header">
+        <div>
+            <h1 class="card-title">Stock Adjustment: {{ product.name }}</h1>
+            <p style="color: var(--text-muted); font-size: 0.875rem;">Code: <code>{{ product.product_code }}</code> | Current Stock: <strong>{{ product.stock_quantity }}</strong> units</p>
+        </div>
+        <a href="{% url 'product_list' %}" class="btn btn-secondary btn-sm">&larr; Back</a>
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <label class="form-label" for="quantity_change">Quantity Change (Positive to add, Negative to deduct) *</label>
+            <input type="number" id="quantity_change" name="quantity_change" class="form-control" placeholder="e.g. +10 or -5" required>
+            <small style="color: var(--text-muted);">Stock cannot be reduced below zero.</small>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="reason">Mandatory Adjustment Reason *</label>
+            <textarea id="reason" name="reason" rows="3" class="form-control" placeholder="Explain reason for adjustment (e.g. Physical inventory count correction, Damaged stock write-off)" required></textarea>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem; border-top: 1px solid var(--border); padding-top: 1rem;">
+            <button type="submit" class="btn btn-accent" data-confirm="Are you sure you want to apply this stock adjustment?">
+                Apply Stock Adjustment
+            </button>
+            <a href="{% url 'product_list' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<!-- Recent Stock Movements for this product -->
+<div class="card" style="max-width: 650px; margin: 0 auto;">
+    <div class="card-header">
+        <h2 class="card-title" style="font-size: 1.1rem;">Recent Stock Movements</h2>
+    </div>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Change</th>
+                    <th>Reason</th>
+                    <th>By</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in movements %}
+                <tr>
+                    <td><span class="badge badge-secondary" style="font-size: 0.7rem;">{{ m.get_movement_type_display }}</span></td>
+                    <td><strong style="color: {% if m.quantity_change > 0 %}var(--success){% else %}var(--danger){% endif %};">{{ m.quantity_change:+d }}</strong></td>
+                    <td style="font-size: 0.85rem;">{{ m.reason }}</td>
+                    <td style="font-size: 0.85rem;">{{ m.created_by.name }}</td>
+                    <td style="font-size: 0.85rem; color: var(--text-muted);">{{ m.timestamp|date:"d M Y H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">
+                        No previous movements recorded for this item.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}Customers - Savyant Systems{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div>
+            <h1 class="card-title">Customer Directory</h1>
+            <p style="color: var(--text-muted); font-size: 0.875rem;">Maintain customer master records</p>
+        </div>
+        {% if user.is_admin_user %}
+        <div>
+            <a href="{% url 'customer_create' %}" class="btn btn-primary">+ Add New Customer</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Search & Filters -->
+    <form method="GET" class="form-inline-filter">
+        <div style="flex: 1; min-width: 250px;">
+            <label class="form-label">Search</label>
+            <input type="text" name="q" value="{{ search_query }}" placeholder="Search by name, email or mobile..." class="form-control">
+        </div>
+
+        {% if user.is_admin_user %}
+        <div style="min-width: 150px;">
+            <label class="form-label">Status</label>
+            <select name="status" class="form-select">
+                <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Statuses</option>
+                <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active Only</option>
+                <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive Only</option>
+            </select>
+        </div>
+        {% endif %}
+
+        <div>
+            <button type="submit" class="btn btn-secondary">Filter</button>
+            {% if search_query or status_filter != 'all' %}
+            <a href="{% url 'customer_list' %}" class="btn btn-sm btn-secondary" style="margin-left: 0.25rem;">Reset</a>
+            {% endif %}
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Customer Name</th>
+                    <th>Email Address</th>
+                    <th>Mobile Number</th>
+                    <th>City</th>
+                    <th>Status</th>
+                    {% if user.is_admin_user %}
+                    <th style="text-align: right;">Actions</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for customer in customers %}
+                <tr>
+                    <td><strong>{{ customer.name }}</strong></td>
+                    <td>{{ customer.email }}</td>
+                    <td>{{ customer.mobile }}</td>
+                    <td>{{ customer.city }}</td>
+                    <td>
+                        <span class="badge {% if customer.is_active %}badge-active{% else %}badge-inactive{% endif %}">
+                            {% if customer.is_active %}Active{% else %}Inactive{% endif %}
+                        </span>
+                    </td>
+                    {% if user.is_admin_user %}
+                    <td style="text-align: right;">
+                        <a href="{% url 'customer_edit' customer.id %}" class="btn btn-secondary btn-sm">Edit</a>
+                        
+                        <form method="POST" action="{% url 'customer_toggle_status' customer.id %}" style="display: inline-block;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-secondary btn-sm" title="Toggle active status">
+                                {% if customer.is_active %}Deactivate{% else %}Activate{% endif %}
+                            </button>
+                        </form>
+
+                        {% if customer.can_delete %}
+                        <a href="{% url 'customer_delete' customer.id %}" class="btn btn-danger btn-sm">Delete</a>
+                        {% else %}
+                        <button type="button" class="btn btn-secondary btn-sm" disabled title="Referenced by sales orders. Deactivate instead of deleting.">
+                            Referenced
+                        </button>
+                        {% endif %}
+                    </td>
+                    {% endif %}
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                        No customers found matching your criteria.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

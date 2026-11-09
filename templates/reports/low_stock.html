@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Low Stock Report - Savyant Systems{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div>
+            <h1 class="card-title">Low Stock Report</h1>
+            <p style="color: var(--text-muted); font-size: 0.875rem;">
+                Active products with stock quantities below the user-specified threshold.
+            </p>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+            <a href="{% url 'report_customer_sales' %}" class="btn btn-secondary btn-sm">Customer Sales</a>
+            <a href="{% url 'report_product_sales' %}" class="btn btn-secondary btn-sm">Product Sales</a>
+            <a href="{% url 'report_stock_movements' %}" class="btn btn-secondary btn-sm">Stock Movements</a>
+        </div>
+    </div>
+
+    <!-- Threshold Input Form -->
+    <form method="GET" class="form-inline-filter" style="margin-bottom: 1.5rem;">
+        <div style="width: 200px;">
+            <label class="form-label" for="threshold">Stock Alert Threshold</label>
+            <input type="number" id="threshold" name="threshold" value="{{ threshold }}" min="1" step="1" class="form-control">
+        </div>
+        <div>
+            <button type="submit" class="btn btn-secondary">Apply Threshold</button>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Product Code</th>
+                    <th>Product Name</th>
+                    <th>Category</th>
+                    <th>Rate (₹)</th>
+                    <th>Current Stock</th>
+                    <th>Status</th>
+                    {% if user.is_admin_user %}
+                    <th style="text-align: right;">Action</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in products %}
+                <tr>
+                    <td><code>{{ p.product_code }}</code></td>
+                    <td><strong>{{ p.name }}</strong></td>
+                    <td><span class="badge badge-secondary" style="background: #e2e8f0; color: #334155;">{{ p.category }}</span></td>
+                    <td>₹{{ p.price|floatformat:2 }}</td>
+                    <td>
+                        <strong style="color: var(--danger); font-size: 1.1rem;">
+                            {{ p.stock_quantity }}
+                        </strong>
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">(Below {{ threshold }})</span>
+                    </td>
+                    <td>
+                        <span class="badge {% if p.is_active %}badge-active{% else %}badge-inactive{% endif %}">
+                            {% if p.is_active %}Active{% else %}Inactive{% endif %}
+                        </span>
+                    </td>
+                    {% if user.is_admin_user %}
+                    <td style="text-align: right;">
+                        <a href="{% url 'stock_adjust' p.id %}" class="btn btn-accent btn-sm">Adjust Stock</a>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align: center; color: var(--success); padding: 2.5rem;">
+                        <strong>All good!</strong> No products found with stock below {{ threshold }} units.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
